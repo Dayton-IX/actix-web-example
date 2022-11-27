@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 
 struct AppState {
@@ -26,7 +27,10 @@ async fn cool_fact() -> String {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
+        let cors = Cors::default().allow_any_origin().allow_any_method();
+
         App::new()
+            .wrap(cors)
             .app_data(web::Data::new(AppState {
                 app_name: String::from("actix-web-example"),
             }))
