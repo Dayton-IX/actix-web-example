@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder, Result};
 
 struct AppState {
     app_name: String,
@@ -31,6 +31,13 @@ async fn get_user_by_name(path: web::Path<(String,)>) -> HttpResponse {
     HttpResponse::Ok().body(format!("User info: {}", user_name))
 }
 
+#[get("/params/{int}/{string}")]
+async fn multi_params_example(req: HttpRequest) -> Result<String> {
+    let p1: u8 = req.match_info().get("int").unwrap().parse().unwrap();
+    let p2: String = req.match_info().get("string").unwrap().parse().unwrap();
+    Ok(format!("values: int: {}, string: {}", p1, p2))
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -45,6 +52,7 @@ async fn main() -> std::io::Result<()> {
             .service(index)
             .service(echo)
             .service(get_user_by_name)
+            .service(multi_params_example)
             .route("/hey", web::get().to(manual_hello))
     })
     .bind(("127.0.0.1", 8080))?
